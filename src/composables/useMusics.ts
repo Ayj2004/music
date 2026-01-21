@@ -9,7 +9,6 @@ export const useMusics = () => {
   const error = ref("");
   const currentMusic = ref<Music | null>(null);
   const isPlaying = ref(false);
-  // 保留audioRef，但改为需外部挂载DOM
   const audioRef = ref<HTMLAudioElement | null>(null);
 
   // 根据ID查找音乐
@@ -41,7 +40,6 @@ export const useMusics = () => {
           lyric: music.lyric || "暂无歌词",
           audioPath: music.audioPath || "/music/default.mp3",
         }));
-        // 默认选中第一首
         if (musics.value.length > 0 && !currentMusic.value) {
           currentMusic.value = musics.value[0];
         }
@@ -92,37 +90,50 @@ export const useMusics = () => {
     }
   };
 
-  // 播放/暂停切换（增加错误捕获）
+  // 播放/暂停：强制设置src + 捕获播放错误
   const togglePlay = () => {
-    if (!audioRef.value || !currentMusic.value) return;
+    if (!audioRef.value || !currentMusic.value) {
+      error.value = "未加载音频资源或无选中歌曲";
+      return;
+    }
+
     try {
+      // 强制设置src（确保路径正确）
+      audioRef.value.src = currentMusic.value.audioPath;
       if (isPlaying.value) {
         audioRef.value.pause();
       } else {
-        // 先设置src再播放，确保路径正确
-        audioRef.value.src = currentMusic.value.audioPath;
-        audioRef.value.play();
+        // 解决浏览器自动播放限制：必须由用户交互触发
+        const playPromise = audioRef.value.play();
+        if (playPromise) {
+          playPromise.catch((err) => {
+            console.error("播放失败（浏览器限制）：", err);
+            error.value = "播放失败：请手动点击播放（浏览器禁止自动播放）";
+          });
+        }
       }
       isPlaying.value = !isPlaying.value;
     } catch (err) {
-      console.error("播放/暂停失败：", err);
-      error.value = "播放失败：浏览器禁止自动播放，请手动点击播放";
+      console.error("播放/暂停异常：", err);
+      error.value = `播放失败：${(err as Error).message}`;
       isPlaying.value = false;
     }
   };
 
-  // 切换歌曲（增加错误捕获）
+  // 切换歌曲：强制重置src + 播放
   const changeMusic = (music: Music) => {
-    if (!audioRef.value) return;
-    try {
-      currentMusic.value = music;
+    currentMusic.value = music;
+    if (audioRef.value) {
       audioRef.value.src = music.audioPath;
-      audioRef.value.play();
+      // 捕获切换歌曲时的播放错误
+      const playPromise = audioRef.value.play();
+      if (playPromise) {
+        playPromise.catch((err) => {
+          console.error("切换歌曲播放失败：", err);
+          error.value = "切换歌曲失败：请手动点击播放";
+        });
+      }
       isPlaying.value = true;
-    } catch (err) {
-      console.error("切换歌曲失败：", err);
-      error.value = "播放失败：浏览器禁止自动播放，请手动点击播放";
-      isPlaying.value = false;
     }
   };
 
@@ -142,7 +153,7 @@ export const useMusics = () => {
     error,
     currentMusic,
     isPlaying,
-    audioRef, // 暴露给组件绑定DOM
+    audioRef,
     fetchMusics,
     fetchMusicById,
     getMusicById,
