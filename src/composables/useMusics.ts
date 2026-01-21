@@ -1,16 +1,15 @@
 import { ref } from "vue";
 import type { Music, KVResponse } from "@/types";
 
-// 替换原EDGE_FUNCTION_BASE_URL为你的KV函数地址
 const EDGE_FUNCTION_BASE_URL = "https://kvmusic.4fa2a2a9.er.aliyun-esa.net";
 
 export const useMusics = () => {
   const musics = ref<Music[]>([]);
   const loading = ref(false);
   const error = ref("");
-  // 播放状态
   const currentMusic = ref<Music | null>(null);
   const isPlaying = ref(false);
+  // 保留audioRef，但改为需外部挂载DOM
   const audioRef = ref<HTMLAudioElement | null>(null);
 
   // 根据ID查找音乐
@@ -93,24 +92,37 @@ export const useMusics = () => {
     }
   };
 
-  // 播放/暂停切换
+  // 播放/暂停切换（增加错误捕获）
   const togglePlay = () => {
     if (!audioRef.value || !currentMusic.value) return;
-    if (isPlaying.value) {
-      audioRef.value.pause();
-    } else {
-      audioRef.value.play();
+    try {
+      if (isPlaying.value) {
+        audioRef.value.pause();
+      } else {
+        // 先设置src再播放，确保路径正确
+        audioRef.value.src = currentMusic.value.audioPath;
+        audioRef.value.play();
+      }
+      isPlaying.value = !isPlaying.value;
+    } catch (err) {
+      console.error("播放/暂停失败：", err);
+      error.value = "播放失败：浏览器禁止自动播放，请手动点击播放";
+      isPlaying.value = false;
     }
-    isPlaying.value = !isPlaying.value;
   };
 
-  // 切换歌曲
+  // 切换歌曲（增加错误捕获）
   const changeMusic = (music: Music) => {
-    currentMusic.value = music;
-    if (audioRef.value) {
+    if (!audioRef.value) return;
+    try {
+      currentMusic.value = music;
       audioRef.value.src = music.audioPath;
       audioRef.value.play();
       isPlaying.value = true;
+    } catch (err) {
+      console.error("切换歌曲失败：", err);
+      error.value = "播放失败：浏览器禁止自动播放，请手动点击播放";
+      isPlaying.value = false;
     }
   };
 
@@ -130,7 +142,7 @@ export const useMusics = () => {
     error,
     currentMusic,
     isPlaying,
-    audioRef,
+    audioRef, // 暴露给组件绑定DOM
     fetchMusics,
     fetchMusicById,
     getMusicById,

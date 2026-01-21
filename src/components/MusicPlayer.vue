@@ -22,10 +22,13 @@
         <!-- 下一首 -->
         <button @click="playNext" class="text-xl">⏭️</button>
       </div>
-      <!-- 音频元素（隐藏） -->
+      <!-- 错误提示 -->
+      <div v-if="error" class="text-red-500 text-sm">
+        {{ error }}
+      </div>
+      <!-- 音频元素（隐藏，绑定ref到useMusics的audioRef） -->
       <audio
-        ref="audioRef"
-        :src="currentMusic.audioPath"
+        ref="audioRefDOM"
         @play="isPlaying = true"
         @pause="isPlaying = false"
         @ended="handleAudioEnded"
@@ -36,17 +39,38 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch, onMounted } from "vue";
 import { useMusics } from "@/composables/useMusics";
 
 const {
   currentMusic,
   isPlaying,
-  audioRef,
+  audioRef: globalAudioRef, // 全局audioRef
   togglePlay,
   handleAudioEnded,
   musics,
   changeMusic,
+  error,
 } = useMusics();
+
+// 本地ref绑定DOM元素
+const audioRefDOM = ref<HTMLAudioElement | null>(null);
+
+// 关键：将本地DOM ref同步到全局audioRef
+watch(
+  audioRefDOM,
+  (newVal) => {
+    globalAudioRef.value = newVal;
+  },
+  { immediate: true }
+);
+
+// 确保DOM挂载后同步ref
+onMounted(() => {
+  if (audioRefDOM.value) {
+    globalAudioRef.value = audioRefDOM.value;
+  }
+});
 
 // 下一首
 const playNext = () => {
