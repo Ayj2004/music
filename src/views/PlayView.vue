@@ -67,7 +67,6 @@ import { onMounted, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Layout from "@/components/Layout.vue";
 import { useMusics } from "@/composables/useMusics";
-import type { Music } from "@/types";
 
 const route = useRoute();
 const router = useRouter();
