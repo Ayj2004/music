@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import type { Music, KVResponse } from "@/types";
 
 // 替换原EDGE_FUNCTION_BASE_URL为你的KV函数地址
