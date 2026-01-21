@@ -2,7 +2,7 @@
   <div
     class="music-card"
     :class="{ active: music.id === currentMusic?.id }"
-    @click="handleClick"
+    @click="goToPlayPage" // 点击卡片跳转播放页
   >
     <img
       :src="music.cover"
@@ -14,7 +14,7 @@
       <p class="text-gray-600 mb-4">歌手：{{ music.singer }}</p>
       <button
         class="px-4 py-1 bg-primary text-white rounded-md hover:bg-primary-light transition-colors"
-        @click.stop="togglePlay"
+        @click.stop="handlePlayClick" // 阻止事件冒泡，仅控制播放
       >
         {{ isPlaying && music.id === currentMusic?.id ? "暂停" : "播放" }}
       </button>
@@ -25,20 +25,26 @@
 <script setup lang="ts">
 import type { Music } from "@/types";
 import { useMusics } from "@/composables/useMusics";
+import { useRouter } from "vue-router"; // 导入路由
 
 const props = defineProps<{
   music: Music;
 }>();
 
+const router = useRouter(); // 初始化路由
 const { currentMusic, isPlaying, togglePlay, changeMusic } = useMusics();
 
-// 点击卡片切换歌曲
-const handleClick = () => {
+// 跳转到播放页面
+const goToPlayPage = () => {
+  router.push(`/play/${props.music.id}`);
+};
+
+// 点击播放按钮的逻辑
+const handlePlayClick = () => {
   if (props.music.id !== currentMusic.value?.id) {
-    changeMusic(props.music);
-  } else {
-    togglePlay();
+    changeMusic(props.music); // 切换到当前歌曲
   }
+  togglePlay(); // 播放/暂停
 };
 </script>
 
