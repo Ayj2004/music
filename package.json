@@ -1,21 +1,29 @@
 {
-  "name": "vite-vue-typescript-starter",
+  "name": "vue-blog-system",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "vue-tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.5.18"
+    "vue": "^3.4.19",
+    "vue-router": "^4.2.5",
+    "date-fns": "^3.3.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.1",
-    "@vue/tsconfig": "^0.8.0",
-    "typescript": "~5.8.3",
-    "vite": "^7.1.2",
-    "vue-tsc": "^3.0.5"
+    "@vitejs/plugin-vue": "^5.0.4",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "5.2.2",
+    "vite": "^5.1.0",
+    "vue-tsc": "1.8.27"
+  },
+  "engines": {
+    "node": ">=18.0.0 <22.0.0",
+    "npm": ">=8.0.0"
   }
 }

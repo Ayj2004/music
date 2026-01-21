@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 自定义主题变量（改为紫色） */
+:root {
+  --primary: #9333ea; /* 主紫色 */
+  --primary-light: #a855f7; /* 浅紫（hover） */
+  --primary-dark: #7e22ce; /* 深紫（选中） */
+  --bg-color: #ffffff;
+  --text-color: #1e293b;
+  --card-bg: #f8fafc;
+  --border-color: #e2e8f0;
+}
+
+.dark {
+  --primary: #a855f7;
+  --primary-light: #c084fc;
+  --primary-dark: #7e22ce;
+  --bg-color: #0f172a;
+  --text-color: #f1f5f9;
+  --card-bg: #1e293b;
+  --border-color: #334155;
+}
+
+body {
+  @apply bg-gray-50 text-gray-800;
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.bg-primary-light {
+  background-color: var(--primary-light);
+}
+
+.bg-primary-dark {
+  background-color: var(--primary-dark);
+}
+
+/* 播放器样式 */
+.music-player {
+  @apply fixed bottom-0 left-0 right-0 bg-white shadow-lg py-4 px-6 border-t border-gray-200 z-50;
+}
+
+.music-card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow cursor-pointer;
+}
+
+.music-card.active {
+  @apply border-2 border-primary;
+}

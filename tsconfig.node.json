@@ -11,7 +11,8 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "noEmit": true,
+    "noEmit": false, // 改：关闭noEmit（解决TS6310报错）
+    "composite": true, // 新增：开启composite（解决TS6306报错）
 
     /* Linting */
     "strict": true,

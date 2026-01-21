@@ -1,7 +1,32 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    /* 模块解析选项 */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": false, // 改：关闭（避免与子项目兼容冲突）
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true, // 主项目保留noEmit（仅做类型检查）
+    "jsx": "preserve",
+    /* 严格类型检查选项 */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    /* Vue 相关 */
+    "types": ["vite/client"],
+    "allowSyntheticDefaultImports": true,
+    "verbatimModuleSyntax": false // 新增：关闭（兼容Vue+TS写法）
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "exclude": ["node_modules", "dist"] // 新增：排除无需编译的目录
 }
