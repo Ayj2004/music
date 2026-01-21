@@ -37,13 +37,29 @@
             歌手：{{ currentMusic.singer }}
           </p>
 
-          <!-- 播放/暂停按钮 -->
-          <button
-            class="px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors text-lg mb-8"
-            @click="togglePlay"
-          >
-            {{ isPlaying ? "⏸️ 暂停" : "▶️ 播放" }}
-          </button>
+          <!-- 播放/暂停按钮 + 音量调节 -->
+          <div class="flex flex-col sm:flex-row items-center gap-4 mb-8">
+            <button
+              class="px-8 py-3 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors text-lg"
+              @click="togglePlay"
+            >
+              {{ isPlaying ? "⏸️ 暂停" : "▶️ 播放" }}
+            </button>
+
+            <!-- 新增音量调节区域 -->
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <span class="text-xl">{{ volumeIcon }}</span>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                v-model="volume"
+                class="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                @input="adjustVolume"
+              />
+            </div>
+          </div>
 
           <!-- 歌词展示 -->
           <div
@@ -63,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount } from "vue";
+import { onMounted, onBeforeUnmount, ref, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Layout from "@/components/Layout.vue";
 import { useMusics } from "@/composables/useMusics";
@@ -84,6 +100,34 @@ const {
   handleAudioEnded,
   changeMusic,
 } = useMusics();
+
+// 新增音量控制相关
+const volume = ref(0.7); // 默认音量70%
+
+// 音量图标计算属性
+const volumeIcon = computed(() => {
+  if (volume.value === 0) return "🔇";
+  if (volume.value < 0.5) return "🔈";
+  return "🔊";
+});
+
+// 调整音量方法
+const adjustVolume = () => {
+  if (audioRef.value) {
+    audioRef.value.volume = volume.value;
+  }
+};
+
+// 监听音频元素挂载，同步音量
+watch(
+  audioRef,
+  (newAudio) => {
+    if (newAudio) {
+      newAudio.volume = volume.value;
+    }
+  },
+  { immediate: true }
+);
 
 // 加载当前音乐详情
 const loadCurrentMusic = async () => {
@@ -116,5 +160,25 @@ onBeforeUnmount(() => {
 .lyric {
   white-space: pre-line; /* 保留歌词换行 */
   line-height: 1.8;
+}
+
+/* 自定义音量滑块样式 */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: none;
 }
 </style>

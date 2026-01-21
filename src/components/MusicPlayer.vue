@@ -13,14 +13,27 @@
         <p class="text-sm text-gray-500">{{ currentMusic.singer }}</p>
         <p class="text-sm mt-1 line-clamp-1">{{ currentMusic.lyric }}</p>
       </div>
-      <!-- 播放控制 -->
+      <!-- 播放控制 + 音量调节 -->
       <div class="flex items-center gap-4">
         <button @click="togglePlay" class="text-xl">
           {{ isPlaying ? "⏸️" : "▶️" }}
         </button>
         <button @click="playNext" class="text-xl">⏭️</button>
+        <!-- 新增音量调节 -->
+        <div class="flex items-center gap-1">
+          <span class="text-lg">{{ volumeIcon }}</span>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            v-model="volume"
+            class="w-20 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            @input="adjustVolume"
+          />
+        </div>
       </div>
-      <!-- 音频元素：移除:src，改为通过逻辑动态设置，ref绑定到全局audioRef -->
+      <!-- 音频元素 -->
       <audio
         ref="localAudioRef"
         @play="isPlaying = true"
@@ -33,13 +46,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue"; // 新增ref/watch/onMounted
+import { ref, watch, onMounted, computed } from "vue";
 import { useMusics } from "@/composables/useMusics";
 
 const {
   currentMusic,
   isPlaying,
-  audioRef: globalAudioRef, // 接收全局audioRef
+  audioRef: globalAudioRef,
   togglePlay,
   handleAudioEnded,
   musics,
@@ -49,11 +62,27 @@ const {
 // 本地ref绑定DOM
 const localAudioRef = ref<HTMLAudioElement | null>(null);
 
-// 关键：将本地DOM ref同步到全局audioRef
+// 新增音量控制
+const volume = ref(0.7);
+const volumeIcon = computed(() => {
+  if (volume.value === 0) return "🔇";
+  if (volume.value < 0.5) return "🔈";
+  return "🔊";
+});
+
+const adjustVolume = () => {
+  if (globalAudioRef.value) {
+    globalAudioRef.value.volume = volume.value;
+  }
+};
+
+// 同步本地ref到全局
 watch(
   localAudioRef,
   (newVal) => {
     globalAudioRef.value = newVal;
+    // 同步音量
+    if (newVal) newVal.volume = volume.value;
   },
   { immediate: true }
 );
@@ -62,6 +91,7 @@ watch(
 onMounted(() => {
   if (localAudioRef.value) {
     globalAudioRef.value = localAudioRef.value;
+    localAudioRef.value.volume = volume.value;
   }
 });
 

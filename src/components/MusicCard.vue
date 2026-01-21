@@ -12,12 +12,7 @@
     <div class="p-4">
       <h3 class="text-xl font-bold mb-2 line-clamp-1">{{ music.name }}</h3>
       <p class="text-gray-600 mb-4">歌手：{{ music.singer }}</p>
-      <button
-        class="px-4 py-1 bg-primary text-white rounded-md hover:bg-primary-light transition-colors"
-        @click.stop="handlePlayClick"
-      >
-        {{ isPlaying && music.id === currentMusic?.id ? "暂停" : "播放" }}
-      </button>
+      <!-- 移除播放按钮 -->
     </div>
   </div>
 </template>
@@ -32,18 +27,13 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
-const { currentMusic, isPlaying, togglePlay, changeMusic } = useMusics();
+const { currentMusic } = useMusics(); // 仅保留currentMusic用于高亮，移除播放相关方法
 
+// 跳转到播放页面
 const goToPlayPage = () => {
   router.push(`/play/${props.music.id}`);
 };
-
-const handlePlayClick = () => {
-  if (props.music.id !== currentMusic.value?.id) {
-    changeMusic(props.music);
-  }
-  togglePlay();
-};
+// 移除handlePlayClick方法
 </script>
 
 <style scoped>
